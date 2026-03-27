@@ -85,8 +85,13 @@ public class CartServiceImpl implements CartService {
             throw new BadRequestException("Cart item does not belong to your cart");
         }
 
-        if (cartItem.getProduct().getStockQuantity() < quantity) {
-            throw new BadRequestException("Insufficient stock. Available: " + cartItem.getProduct().getStockQuantity());
+        Product product = cartItem.getProduct();
+        if (product == null) {
+            throw new ResourceNotFoundException("Product", "cartItem", cartItemId);
+        }
+
+        if (product.getStockQuantity() < quantity) {
+            throw new BadRequestException("Insufficient stock. Available: " + product.getStockQuantity());
         }
 
         cartItem.setQuantity(quantity);
@@ -143,6 +148,7 @@ public class CartServiceImpl implements CartService {
                 .id(cart.getId())
                 .totalPrice(cart.getTotalPrice())
                 .items(cart.getCartItems().stream()
+                        .filter(item -> item.getProduct() != null)
                         .map(item -> CartResponse.CartItemResponse.builder()
                                 .id(item.getId())
                                 .productId(item.getProduct().getId())

@@ -54,14 +54,21 @@ public class OrderServiceImpl implements OrderService {
         for (CartItem cartItem : cart.getCartItems()) {
             Product product = cartItem.getProduct();
 
-            if (product.getStockQuantity() < cartItem.getQuantity()) {
+            if (product == null) {
+                throw new ResourceNotFoundException("Product", "cartItem", cartItem.getId());
+            }
+
+            int newStockQuantity = product.getStockQuantity() - cartItem.getQuantity();
+
+            if (newStockQuantity < 0) {
                 throw new BadRequestException(
                         "Insufficient stock for product: " + product.getName() +
-                        ". Available: " + product.getStockQuantity()
+                        ". Available: " + product.getStockQuantity() +
+                        ", Requested: " + cartItem.getQuantity()
                 );
             }
 
-            product.setStockQuantity(product.getStockQuantity() - cartItem.getQuantity());
+            product.setStockQuantity(newStockQuantity);
             productRepository.save(product);
 
             OrderItem orderItem = OrderItem.builder()
