@@ -27,6 +27,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class PaymentServiceImpl implements PaymentService {
 
+    private static final BigDecimal CENTS_PER_DOLLAR = BigDecimal.valueOf(100);
+
     private final PaymentRepository paymentRepository;
     private final OrderRepository orderRepository;
 
@@ -47,9 +49,9 @@ public class PaymentServiceImpl implements PaymentService {
         String currency = request.getCurrency() != null ? request.getCurrency() : "USD";
 
         try {
-            // Create Stripe charge
+            // Create Stripe charge — convert dollars to cents for Stripe API
             ChargeCreateParams chargeParams = ChargeCreateParams.builder()
-                    .setAmount(order.getTotalPrice().multiply(new java.math.BigDecimal("100")).longValue())
+                    .setAmount(order.getTotalPrice().multiply(CENTS_PER_DOLLAR).longValue())
                     .setCurrency(currency.toLowerCase())
                     .setSource(request.getToken())
                     .setDescription("Order #" + order.getId() + " payment")

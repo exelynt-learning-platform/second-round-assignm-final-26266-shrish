@@ -43,6 +43,10 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private Role role;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean active = true;
+
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Cart cart;
 
@@ -68,23 +72,27 @@ public class User implements UserDetails {
         return email;
     }
 
+    /** Account expiration is not implemented; accounts never expire. */
     @Override
     public boolean isAccountNonExpired() {
         return true;
     }
 
+    /** Account locking is not implemented; accounts are never locked. */
     @Override
     public boolean isAccountNonLocked() {
         return true;
     }
 
+    /** Credential expiration is not implemented; credentials never expire. */
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
     }
 
+    /** Returns whether the user account is active. Controlled by the 'active' field. */
     @Override
     public boolean isEnabled() {
-        return true;
+        return active;
     }
 }

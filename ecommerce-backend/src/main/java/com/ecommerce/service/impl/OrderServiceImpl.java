@@ -43,6 +43,7 @@ public class OrderServiceImpl implements OrderService {
 
         BigDecimal totalPrice = BigDecimal.ZERO;
         List<OrderItem> orderItems = new ArrayList<>();
+        List<Product> updatedProducts = new ArrayList<>();
 
         Order order = Order.builder()
                 .user(user)
@@ -69,7 +70,7 @@ public class OrderServiceImpl implements OrderService {
             }
 
             product.setStockQuantity(newStockQuantity);
-            productRepository.save(product);
+            updatedProducts.add(product);
 
             OrderItem orderItem = OrderItem.builder()
                     .order(order)
@@ -83,6 +84,8 @@ public class OrderServiceImpl implements OrderService {
                     cartItem.getUnitPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity()))
             );
         }
+
+        productRepository.saveAll(updatedProducts);
 
         order.setOrderItems(orderItems);
         order.setTotalPrice(totalPrice);
