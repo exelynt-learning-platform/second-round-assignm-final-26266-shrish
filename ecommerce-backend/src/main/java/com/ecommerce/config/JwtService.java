@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,18 @@ public class JwtService {
 
     @Value("${jwt.expiration}")
     private long jwtExpiration;
+
+    private static final long MAX_EXPIRATION_MS = 30L * 24 * 60 * 60 * 1000; // 30 days
+
+    @PostConstruct
+    public void validateJwtConfig() {
+        if (jwtExpiration <= 0) {
+            throw new IllegalArgumentException("JWT expiration must be a positive value, got: " + jwtExpiration);
+        }
+        if (jwtExpiration > MAX_EXPIRATION_MS) {
+            throw new IllegalArgumentException("JWT expiration exceeds maximum allowed (30 days): " + jwtExpiration);
+        }
+    }
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
